@@ -51,4 +51,10 @@
 
 ## Add to fstab file
 
-## reboot
+- blkid
+- vi /etc/fstab
+- UUID=xxx /var/log xfs defaults,nodev,nosuid 0 2
+
+## Test
+
+reboot
