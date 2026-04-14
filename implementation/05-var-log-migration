@@ -1,0 +1,54 @@
+# /var/log Migration
+
+## Confirm current layout
+
+- df -h /var
+- lsblk
+- mount | grep ‘ /var ‘
+
+## Estimate required size
+
+- du -sh /var
+
+## Add 20-30% headroom minimum
+
+
+## Create new logical volume
+- lvcreate -n lv_logs -L 20G vg_data
+- mkfs.xfs /dev/vg_data/lv_log
+
+## Prepare new mount point
+
+- mkdir /mnt/newvarlog
+- mount /dev/vg_data/lv_logs /mnt/newvarlog
+
+## Copy /var/log Safely
+
+- rsync -aAXHv –numeric-ids /var/log/ /mnt/newvarlog
+
+## Validate the copy
+- du -sh /var/log /mnt/newvarlog
+- ls -lZ /mnt/newvarlog | head
+
+## Prepare for the cutover
+
+- mv /var/log /var.old
+- mkdir /var/log
+
+## Mount the LV on /var/log 
+
+- mount /dev/vg_data/lv_var_logs /var/log
+
+## Restore SELinux contexts 
+
+- restorecon -RFv /var/log
+
+## Verify System Behavior
+
+- df -h /var/log
+- systemctl status systemd-journald
+- ls /var/log
+
+## Add to fstab file
+
+## reboot
